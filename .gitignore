@@ -1,3 +1,4 @@
 problem.json
 node_modules
 package-lock.json
+server/public/scripts
