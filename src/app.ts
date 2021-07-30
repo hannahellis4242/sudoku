@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { json } from "body-parser";
 import { createProblem, createID, run, Solution } from "./utils/run";
 import SudokuProblem from "./Sudoku/Problem";
@@ -8,19 +8,21 @@ app.use(json());
 
 const solutions: Solution[] = [];
 
-app.post("/solver", async (req: Request, res: Response) => {
-  return new Promise<SudokuProblem>((resolve) => {
-    console.log("sending");
-    const p = createProblem(req.body);
-    res.status(200).send({ id: createID(p), done: false });
-    resolve(p);
-  })
+const values: number[] = [];
+app.post("/solver", (req: Request, res: Response) => {
+  const p = createProblem(req.body);
+  console.log("sending");
+  res.status(200).send({ id: createID(p), done: false });
+  console.log("running");
+  const prom = new Promise<SudokuProblem>((resolve) => resolve(p))
     .then((p: SudokuProblem) => run(p))
     .then((s: Solution) => {
       console.log("adding solution");
       solutions.push(s);
       console.log("done");
     });
+  console.log(prom);
+  console.log("post - done");
 });
 
 app.get("/solver/:tagId", (req: Request, res: Response) => {

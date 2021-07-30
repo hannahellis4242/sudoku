@@ -9,7 +9,7 @@ import { reject } from "../Sudoku/reject";
 import { accept } from "../Sudoku/accept";
 
 type IndexValuePair = [number, number];
-type InputData = IndexValuePair[];
+export type InputData = IndexValuePair[];
 export const createProblem = (data: InputData) => {
   return new SudokuProblem(
     data.map((x: IndexValuePair) => new Entry(x[0], x[1]))
@@ -33,29 +33,26 @@ export const createID = (p: SudokuProblem) => {
 };
 
 export const run = async (p: SudokuProblem) => {
-  return new Promise<Solution>((resolve) => {
-    const id = createID(p);
-    console.log(id);
-    const results: Results = [];
-    const output = (p: SudokuProblem, c: SudokuCandidate) => {
-      results.push(
-        new Grid(p, c).values.map((x: number | null) => {
-          if (x) {
-            return x;
-          } else {
-            return -1;
-          }
-        })
-      );
-    };
-    solve<SudokuProblem, SudokuCandidate>(
-      p,
-      root,
-      first,
-      next,
-      reject,
-      accept,
-      output
-    ).then(() => resolve(new Solution(id, results)));
-  });
+  const id = createID(p);
+  const results: Results = [];
+  const output = (p: SudokuProblem, c: SudokuCandidate) => {
+    results.push(
+      new Grid(p, c).values.map((x: number | null) => {
+        if (x) {
+          return x;
+        } else {
+          return -1;
+        }
+      })
+    );
+  };
+  return solve<SudokuProblem, SudokuCandidate>(
+    p,
+    root,
+    first,
+    next,
+    reject,
+    accept,
+    output
+  ).then(() => new Solution(id, results));
 };
