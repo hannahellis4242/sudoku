@@ -1,10 +1,4 @@
-import {
-  Router,
-  RequestHandler,
-  Request,
-  Response,
-  NextFunction,
-} from "express";
+import { Router, RequestHandler } from "express";
 import { NextFn, solve } from "../Backtrack/backtrack";
 import { accept } from "../Sudoku/accept";
 import SudokuCandidate from "../Sudoku/Candidate";
@@ -31,7 +25,7 @@ class Solution {
 const solutions: Solution[] = [];
 
 const run = async (id: string, p: SudokuProblem) => {
-  return new Promise<void>((resolve) => {
+  return new Promise<Solution>((resolve) => {
     console.log("solving ", id);
     const results: Result[] = [];
     const output = (p: SudokuProblem, c: SudokuCandidate) => {
@@ -56,10 +50,11 @@ const run = async (id: string, p: SudokuProblem) => {
       output
     ).then(() => {
       console.log("solved : ", id);
-      solutions.push(new Solution(id, results));
-      console.log(results);
+      const s = new Solution(id, results);
+      console.log(s);
+      resolve(s);
     });
-    resolve();
+    console.log("done run");
   });
 };
 
@@ -77,19 +72,24 @@ const convertToProblem = (raw: RawData) => {
 };
 
 const postProblem: RequestHandler = async (req, res) => {
-  const problem = convertToProblem(req.body);
-  const id = createProblemID(problem);
-  const index = solutions.findIndex((s: Solution) => s.id === id);
-  if (index >= 0) {
-    const results = solutions[index].results;
-    res.status(200).send({ id, done: true, results });
-  } else {
-    console.log("sending response");
-    res.status(200).send({ id, done: false });
-    console.log("running solver");
-    run(id, problem);
-  }
-  console.log("done post");
+  return new Promise<void>((resolve) => {
+    const problem = convertToProblem(req.body);
+    const id = createProblemID(problem);
+    const index = solutions.findIndex((s: Solution) => s.id === id);
+    if (index >= 0) {
+      const results = solutions[index].results;
+      res.status(200).send({ id, done: true, results });
+    } else {
+      console.log("sending response");
+      res.status(200).send({ id, done: false });
+      console.log("running solver");
+      run(id, problem).then((s: Solution) => {
+        solutions.push(s);
+        resolve();
+      });
+    }
+    console.log("done post");
+  });
 };
 
 export const getSolutionById: RequestHandler<{ id: string }> = (req, res) => {
