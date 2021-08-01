@@ -33,26 +33,29 @@ export const createID = (p: SudokuProblem) => {
 };
 
 export const run = async (p: SudokuProblem) => {
-  const id = createID(p);
-  const results: Results = [];
-  const output = (p: SudokuProblem, c: SudokuCandidate) => {
-    results.push(
-      new Grid(p, c).values.map((x: number | null) => {
-        if (x) {
-          return x;
-        } else {
-          return -1;
-        }
-      })
+  return new Promise<Solution>((resolve) => {
+    const id = createID(p);
+    const results: Results = [];
+    const output = (p: SudokuProblem, c: SudokuCandidate) => {
+      results.push(
+        new Grid(p, c).values.map((x: number | null) => {
+          if (x) {
+            return x;
+          } else {
+            return -1;
+          }
+        })
+      );
+    };
+    solve<SudokuProblem, SudokuCandidate>(
+      p,
+      root,
+      first,
+      next,
+      reject,
+      accept,
+      output
     );
-  };
-  return solve<SudokuProblem, SudokuCandidate>(
-    p,
-    root,
-    first,
-    next,
-    reject,
-    accept,
-    output
-  ).then(() => new Solution(id, results));
+    resolve(new Solution(id, results));
+  });
 };

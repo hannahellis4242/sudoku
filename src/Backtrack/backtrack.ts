@@ -27,7 +27,7 @@ const backtrack = <P, C>(
 };
 
 export type RootFn<P, C> = (problem: P) => C;
-export const solve = async <P, C>(
+export const solve = <P, C>(
   problem: P,
   root: RootFn<P, C>,
   first: FirstFn<P, C>,
@@ -35,9 +35,4 @@ export const solve = async <P, C>(
   reject: RejectFn<P, C>,
   accept: AcceptFn<P, C>,
   output: OutputFn<P, C>
-) => {
-  return new Promise<void>((resolve) => {
-    backtrack(problem, root(problem), first, next, reject, accept, output);
-    resolve();
-  });
-};
+) => backtrack(problem, root(problem), first, next, reject, accept, output);
