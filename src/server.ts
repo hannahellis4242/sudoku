@@ -5,8 +5,11 @@ import { Validator } from "jsonschema";
 const schema = {
   $schema: "https://json-schema.org/draft/2019-09/schema",
   type: "array",
+  minItems: 1,
   items: {
     type: "array",
+    minItems: 2,
+    maxItems: 2,
     items: [
       {
         type: "number",
