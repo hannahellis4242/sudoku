@@ -1,4 +1,8 @@
 import { Router, RequestHandler } from "express";
+import { Socket } from "net";
+
+type InputEntry = [number, number];
+type Input = InputEntry[];
 
 type Result = number[];
 type Results = Result[];
@@ -9,8 +13,26 @@ interface Solution {
 
 const solutions: Solution[] = [];
 
+const getSolution = (x: Input) => {
+  const sock = new Socket();
+  sock.connect(5000, "127.0.0.1", () => {
+    console.log("Connected sudoku sever");
+    sock.write(JSON.stringify(x));
+  });
+  let str = "";
+  sock.on("data", (data: Buffer) => {
+    console.log("server sent : ", data.toString());
+    str += data.toString();
+  });
+  sock.on("close", () => {
+    console.log("Connection closed");
+    solutions.push(JSON.parse(str.toString()));
+  });
+};
+
 const postProblem: RequestHandler = (req, res) => {
-  res.status(404).send();
+  getSolution(req.body);
+  res.status(200).send();
 };
 
 export const getSolutionById: RequestHandler<{ id: string }> = (req, res) => {
