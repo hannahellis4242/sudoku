@@ -4,7 +4,7 @@ module.exports = {
   entry: "./src/app.ts",
   output: {
     filename: "app.js",
-    path: path.resolve(__dirname, "../server/public/scripts"),
+    path: path.resolve(__dirname, "../webserver/public/scripts"),
   },
   devtool: "inline-source-map",
   module: {
