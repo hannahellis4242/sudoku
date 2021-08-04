@@ -1,6 +1,8 @@
 import { Server, Socket } from "net";
 import { createProblem, run, Solution, createID, InputData } from "./utils/run";
 import { Validator } from "jsonschema";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 const schema = {
   $schema: "https://json-schema.org/draft/2019-09/schema",
@@ -83,8 +85,18 @@ const handleConnection = (sock: Socket) => {
   });
 };
 
-const server = new Server();
-server.on("connection", handleConnection);
-server.listen(3000, function () {
-  console.log("server listening to %j", server.address());
-});
+const parser = yargs(hideBin(process.argv))
+  .option("port", {
+    describe: "port to run the server on",
+    alias: "p",
+    type: "number",
+    demandOption: "number",
+  })
+  .parseAsync()
+  .then(({ port: port }) => {
+    const server = new Server();
+    server.on("connection", handleConnection);
+    server.listen(port, function () {
+      console.log("server listening to %j", server.address());
+    });
+  });
