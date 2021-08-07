@@ -6,6 +6,7 @@ import { json } from "body-parser";
 const app = express();
 app.use(json());
 app.use("/solver", router);
+app.use("/img", express.static(path.join(__dirname, "../public/img")));
 app.get("/", (_: Request, res: Response) =>
   res.sendFile(path.join(__dirname, "../public/index.html"))
 );
