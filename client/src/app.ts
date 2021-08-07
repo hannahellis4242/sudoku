@@ -1,28 +1,11 @@
 import axios, { AxiosResponse } from "axios";
-
-const buildSelect = (id: string) => {
-  const select = document.createElement("select");
-  select.id = id;
-  //blank option
-  {
-    const option = document.createElement("option");
-    option.value = " ";
-    option.innerText = " ";
-    select.appendChild(option);
-  }
-  //number options
-  for (let i = 1; i <= 9; ++i) {
-    const option = document.createElement("option");
-    option.value = i.toString();
-    option.innerText = i.toString();
-    select.appendChild(option);
-  }
-  return select;
-};
+import { IndexValuePair, getDataFromCell } from "./utils/utils";
 
 const elements = document.getElementsByTagName("main");
 if (elements.length !== 0) {
   const main = elements[0];
+  const resultSection = document.createElement("section");
+  resultSection.id = "results";
   const cells: HTMLSelectElement[] = [];
   //adding input table
   {
@@ -56,33 +39,14 @@ if (elements.length !== 0) {
       const button = document.createElement("input");
       button.type = "submit";
       button.value = "Solve";
-      button.addEventListener("click", (event: MouseEvent) => {
+      button.addEventListener("click", async (event: MouseEvent) => {
         event.preventDefault();
-        const data = cells
-          .map((select: HTMLSelectElement) => {
-            const matches = select.id.match("cell_(\\d*)");
-            if (matches && matches.length !== 0) {
-              const index = parseInt(matches[1]);
-              if (!isNaN(index) && select.value !== " ") {
-                const num = parseInt(select.value);
-                if (!isNaN(num)) {
-                  return [index, num];
-                }
-              }
-            }
-            return null;
-          })
-          .filter((value: number[] | null) => value !== null);
-        axios
-          .post("/solver", data)
-          .then((value: AxiosResponse<any>) => {
-            console.log("response : ", value);
-          })
-          .catch((error: Error) => console.log(error));
+        handleSolve(cells, resultSection);
       });
       form.appendChild(button);
     }
     inputSection.appendChild(form);
     main.appendChild(inputSection);
+    main.appendChild(resultSection);
   }
 }

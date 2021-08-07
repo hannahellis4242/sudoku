@@ -13,9 +13,9 @@ interface Solution {
 
 const solutions: Solution[] = [];
 
-const getSolution = (x: Input) => {
+const getSolution = (x: Input, port: number) => {
   const sock = new Socket();
-  sock.connect(5000, "127.0.0.1", () => {
+  sock.connect(port, "127.0.0.1", () => {
     console.log("Connected sudoku sever");
     sock.write(JSON.stringify(x));
   });
@@ -31,8 +31,8 @@ const getSolution = (x: Input) => {
 };
 
 const postProblem: RequestHandler = (req, res) => {
-  getSolution(req.body);
   res.status(200).send();
+  getSolution(req.body, 5000);
 };
 
 export const getSolutionById: RequestHandler<{ id: string }> = (req, res) => {

@@ -28,10 +28,4 @@ app.get("*", (req: Request, res: Response) => {
   console.log(req.url);
   res.status(404).send();
 });
-/*
-app.post("/solver", (req: Request, res: Response) => {
-  setTimeout(() => console.log("post waited"), 10000);
-  res.status(200).send({ message: "Hello" });
-});
-*/
 app.listen(3000, () => console.log("sudoku server lisening on port 3000"));
