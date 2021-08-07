@@ -15,7 +15,6 @@ const pollForSolution = (id: string) => {
     let result: Results | null = null;
 
     const pollState = () => {
-      console.log("Polling...");
       axios
         .get("/solver/id/" + encodeURI(id))
         .then((value: AxiosResponse<GetResult>) => {

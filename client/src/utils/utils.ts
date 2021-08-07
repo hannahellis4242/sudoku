@@ -39,26 +39,59 @@ const getDataFromCell = (cell: HTMLSelectElement): IndexValuePair | null => {
   return null;
 };
 
-const buildSolution = async (results: Results, parent: HTMLElement) => {
-  //clear
-  while (parent.lastChild) {
-    parent.removeChild(parent.lastChild);
+const clear = (x: HTMLElement) => {
+  while (x.lastChild) {
+    x.removeChild(x.lastChild);
   }
-  parent.innerText = JSON.stringify(results);
+};
+
+const buildSolutionTable = (result: number[], parent: HTMLElement) => {
+  const table = document.createElement("table");
+  for (let row = 0; row < 9; ++row) {
+    const tableRow = document.createElement("tr");
+    const rowIndexStart = row * 9;
+    for (let col = 0; col < 9; ++col) {
+      const index = rowIndexStart + col;
+      const tableData = document.createElement("td");
+      tableData.innerText = result[index].toString();
+      tableRow.appendChild(tableData);
+    }
+    table.appendChild(tableRow);
+  }
+  parent.appendChild(table);
+};
+
+const buildSolution = (results: Results, parent: HTMLElement) => {
+  clear(parent);
+  results.forEach((result: number[]) => {
+    const div = document.createElement("div");
+    div.classList.add("solution");
+    buildSolutionTable(result, div);
+    parent.appendChild(div);
+  });
 };
 
 export const handleSolve = (
   cells: HTMLSelectElement[],
   parent: HTMLElement
 ) => {
-  parent.innerText = "Calculating Solutions.\nPlease Wait...";
+  {
+    clear(parent);
+    const p = document.createElement("p");
+    p.id = "waiting";
+    p.innerText = "Calculating Solutions.\nPlease Wait...";
+    parent.appendChild(p);
+  }
   const data = cells
     .map((cell: HTMLSelectElement) => getDataFromCell(cell))
     .filter((value: IndexValuePair | null) => value !== null) as InputData;
   processSudoku(data)
     .then((result: Results) => buildSolution(result, parent))
     .catch((err: Error) => {
-      console.log(err);
-      parent.innerText = "An Error Occured please try again.";
+      clear(parent);
+      const p = document.createElement("p");
+      p.id = "error";
+      p.innerText = "An error occure\nplease try again.";
+      parent.appendChild(p);
     });
 };
