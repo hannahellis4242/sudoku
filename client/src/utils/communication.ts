@@ -5,37 +5,32 @@ export type Results = Result[];
 interface GetResult {
   id: string;
   done: boolean;
-  result: Results;
+  results: Results;
 }
 
 const pollForSolution = (id: string) => {
   console.log("pollForSolution() is fired");
   return new Promise<Results>((resolve, reject) => {
     const pollingDelay = 1000;
-    let done = false;
     let result: Results | null = null;
 
     const pollState = () => {
       console.log("Polling...");
       axios
-        .get("/solver/" + encodeURI(id))
+        .get("/solver/id/" + encodeURI(id))
         .then((value: AxiosResponse<GetResult>) => {
-          done = value.data.done;
-          result = value.data.result;
+          console.log("data : ", value.data);
+          result = value.data.results;
           continueCheckingForCompletion();
         })
         .catch((err: Error) => reject(err));
     };
 
     const continueCheckingForCompletion = () => {
-      if (done !== true) {
+      if (!result) {
         setTimeout(pollState, pollingDelay);
       } else {
-        if (result) {
-          resolve(result);
-        } else {
-          reject(new Error("null result"));
-        }
+        resolve(result);
       }
     };
 

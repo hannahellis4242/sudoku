@@ -25,8 +25,10 @@ export class Solution {
 export const createID = (p: SudokuProblem) => {
   if (p.entries.length !== 0) {
     return p.entries
-      .map((x: Entry) => x.index.toString() + "," + x.value.toString())
-      .reduce((acc: string, x: string) => acc + ":" + x);
+      .map(
+        (x: Entry) => x.index.toString().padStart(2, "0") + x.value.toString()
+      )
+      .reduce((acc: string, x: string) => acc + x);
   } else {
     return "";
   }

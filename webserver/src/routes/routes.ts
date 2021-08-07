@@ -27,6 +27,7 @@ const getSolution = (x: Input, port: number) => {
   sock.on("close", () => {
     console.log("Connection closed");
     solutions.push(JSON.parse(str.toString()));
+    console.log("solutions in cache : ", solutions.length);
   });
 };
 
@@ -35,12 +36,16 @@ const postProblem: RequestHandler = (req, res) => {
   getSolution(req.body, 5000);
 };
 
-export const getSolutionById: RequestHandler<{ id: string }> = (req, res) => {
+const getSolutionById: RequestHandler<{ id: string }> = (req, res) => {
   const id = req.params.id;
+  console.log("id : ", id);
   const index = solutions.findIndex((s: Solution) => s.id === id);
+  console.log("found index : ", index);
   if (index >= 0) {
     const results = solutions[index].results;
+    console.log(results);
     res.status(200).send({ id, done: true, results });
+    console.log("sent");
   } else {
     res.status(200).send({ id, done: false });
   }
