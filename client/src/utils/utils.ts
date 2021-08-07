@@ -25,9 +25,7 @@ export const buildSelect = (id: string) => {
   return select;
 };
 
-export const getDataFromCell = (
-  cell: HTMLSelectElement
-): IndexValuePair | null => {
+const getDataFromCell = (cell: HTMLSelectElement): IndexValuePair | null => {
   const matches = cell.id.match("cell_(\\d*)");
   if (matches && matches.length !== 0) {
     const index = parseInt(matches[1]);
@@ -41,7 +39,7 @@ export const getDataFromCell = (
   return null;
 };
 
-export const buildSolution = async (results: Results, parent: HTMLElement) => {
+const buildSolution = async (results: Results, parent: HTMLElement) => {
   //clear
   while (parent.lastChild) {
     parent.removeChild(parent.lastChild);

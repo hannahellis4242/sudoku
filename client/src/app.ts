@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { IndexValuePair, getDataFromCell } from "./utils/utils";
+import { buildSelect, handleSolve } from "./utils/utils";
 
 const elements = document.getElementsByTagName("main");
 if (elements.length !== 0) {

@@ -18,7 +18,7 @@ const pollForSolution = (id: string) => {
     const pollState = () => {
       console.log("Polling...");
       axios
-        .get("/solver/" + id)
+        .get("/solver/" + encodeURI(id))
         .then((value: AxiosResponse<GetResult>) => {
           done = value.data.done;
           result = value.data.result;
@@ -45,11 +45,14 @@ const pollForSolution = (id: string) => {
 
 export type IndexValuePair = [number, number];
 export type InputData = IndexValuePair[];
-export const createID = (p: InputData) => {
+const createID = (p: InputData) => {
   if (p.length !== 0) {
     return p
-      .map((x: IndexValuePair) => x[0].toString() + "," + x[1].toString())
-      .reduce((acc: string, x: string) => acc + ":" + x);
+      .map(
+        (x: IndexValuePair) =>
+          x[0].toString().padStart(2, "0") + x[1].toString()
+      )
+      .reduce((acc: string, x: string) => acc + x);
   } else {
     return "";
   }
