@@ -35,53 +35,66 @@ const parseJSON = (str: string): object | Error => {
   }
 };
 
+const processInput = (dataStr: string, sock: Socket, date: Date) => {
+  const raw = parseJSON(dataStr);
+  if (raw instanceof Error) {
+    sock.write(
+      JSON.stringify({
+        error: "parse",
+        input: dataStr,
+        mesage: "could not parse json",
+        result: raw.message.toString(),
+      })
+    );
+    sock.destroy();
+  } else {
+    console.log(date, " > parsed : ", JSON.stringify(raw));
+    const result = isValidJSON(raw);
+    if (result.valid) {
+      const p = createProblem(raw as InputData);
+      console.log(date, " > ", createID(p));
+      run(p)
+        .then((s: Solution) => {
+          console.log(s);
+          return s;
+        })
+        .then((s: Solution) => sock.write(JSON.stringify(s)))
+        .finally(() => sock.destroy());
+      console.log(date, " > solution sent.");
+    } else {
+      sock.write(
+        JSON.stringify({
+          error: "json",
+          input: dataStr,
+          mesage: "could not convert input to json",
+          result: result.toString(),
+        })
+      );
+      sock.destroy();
+    }
+  }
+};
+
 const handleConnection = (sock: Socket) => {
   const date = new Date();
   const remoteAddress = sock.remoteAddress + ":" + sock.remotePort;
   console.log(date, " > new client connection from ", remoteAddress);
+  let dataStr = "";
   sock.on("data", (data: Buffer) => {
     console.log(date, " > data :", data.toString());
-    const raw = parseJSON(data.toString());
-    if (raw instanceof Error) {
-      sock.write(
-        JSON.stringify({
-          error: "parse",
-          input: data.toString(),
-          mesage: "could not parse json",
-          result: raw.message.toString(),
-        })
-      );
-      sock.destroy();
-    } else {
-      console.log(date, " > parsed : ", JSON.stringify(raw));
-      const result = isValidJSON(raw);
-      if (result.valid) {
-        const p = createProblem(raw as InputData);
-        console.log(date, " > ", createID(p));
-        run(p).then((s: Solution) => {
-          sock.write(JSON.stringify(s));
-          sock.destroy();
-        });
-      } else {
-        sock.write(
-          JSON.stringify({
-            error: "json",
-            input: data.toString(),
-            mesage: "could not convert input to json",
-            result: result.toString(),
-          })
-        );
-        sock.destroy();
-      }
+    dataStr += data.toString();
+    if (dataStr.includes("\n")) {
+      processInput(dataStr, sock, date);
+      dataStr = "";
     }
+  });
 
-    sock.once("close", () => {
-      console.log("connection from %s closed", remoteAddress);
-    });
-    sock.on("error", (err: Error) => {
-      console.log("Connection %s error: %s", remoteAddress, err.message);
-      sock.destroy();
-    });
+  sock.once("close", () =>
+    console.log("connection from %s closed", remoteAddress)
+  );
+  sock.on("error", (err: Error) => {
+    console.log("Connection %s error: %s", remoteAddress, err.message);
+    sock.destroy();
   });
 };
 
@@ -97,6 +110,6 @@ const parser = yargs(hideBin(process.argv))
     const server = new Server();
     server.on("connection", handleConnection);
     server.listen(port, function () {
-      console.log("server listening to %j", server.address());
+      console.log("server listening on ", server.address());
     });
   });

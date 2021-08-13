@@ -17,7 +17,7 @@ const getSolution = (x: Input, port: number) => {
   const sock = new Socket();
   sock.connect(port, "127.0.0.1", () => {
     console.log("Connected sudoku sever");
-    sock.write(JSON.stringify(x));
+    sock.write(JSON.stringify(x) + "\n");
   });
   let str = "";
   sock.on("data", (data: Buffer) => {
@@ -26,8 +26,11 @@ const getSolution = (x: Input, port: number) => {
   });
   sock.on("close", () => {
     console.log("Connection closed");
-    solutions.push(JSON.parse(str.toString()));
-    console.log("solutions in cache : ", solutions.length);
+    console.log(str);
+    if (str.length !== 0) {
+      solutions.push(JSON.parse(str.toString()));
+      console.log("solutions in cache : ", solutions.length);
+    }
   });
 };
 
