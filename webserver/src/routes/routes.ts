@@ -34,9 +34,30 @@ const getSolution = (x: Input, port: number) => {
   });
 };
 
+export type IndexValuePair = [number, number];
+export type InputData = IndexValuePair[];
+const createID = (p: InputData) => {
+  if (p.length !== 0) {
+    return p
+      .map(
+        (x: IndexValuePair) =>
+          x[0].toString().padStart(2, "0") + x[1].toString()
+      )
+      .reduce((acc: string, x: string) => acc + x);
+  } else {
+    return "";
+  }
+};
+
 const postProblem: RequestHandler = (req, res) => {
-  res.status(200).send();
-  getSolution(req.body, 5000);
+  const id = createID(req.body);
+  const index = solutions.findIndex((s: Solution) => s.id === id);
+  if (index < 0) {
+    res.status(200).send({ id, done: false });
+    getSolution(req.body, 5000);
+  } else {
+    res.status(200).send({ id, done: true });
+  }
 };
 
 const getSolutionById: RequestHandler<{ id: string }> = (req, res) => {
