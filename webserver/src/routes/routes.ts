@@ -15,7 +15,8 @@ const solutions: Solution[] = [];
 
 const getSolution = (x: Input, port: number) => {
   const sock = new Socket();
-  sock.connect(port, "127.0.0.1", () => {
+  const ip = "sudoku_solver_1"; //"127.0.0.1"
+  sock.connect(port, ip, () => {
     console.log("Connected sudoku sever");
     sock.write(JSON.stringify(x) + "\n");
   });
